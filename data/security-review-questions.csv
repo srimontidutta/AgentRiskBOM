@@ -1,0 +1,7 @@
+question,representative_fields
+What can the agent do without a human?,Autonomy level; approval rules; max tool tier
+What external systems can it affect?,Tool endpoints; side effects; network boundary
+What sensitive data can it see or remember?,Data class; RAG sources; memory type; retention
+Can risky changes be caught before deployment?,Tool diff; prompt hash diff; approval/logging diff
+Could an incident be reconstructed?,Prompt/tool/retrieval/approval logs; retention; tamper resistance
+Which controls should be required?,Risk drivers; control-mapping rules; provenance fields

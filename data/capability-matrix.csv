@@ -1,0 +1,18 @@
+capability_dimension,SBOM,AI-BOM,ML-BOM,AgentRiskBOM
+Software dependency inventory,1.0,0.0,0.0,0.5
+Model metadata,0.0,1.0,1.0,0.5
+Dataset provenance,0.0,0.5,1.0,0.0
+Prompt hierarchy / hashes,0.0,0.0,0.0,1.0
+Tool descriptors and source,0.0,0.0,0.0,1.0
+Tool permissions / risk tiers,0.0,0.0,0.0,1.0
+Runtime autonomy level,0.0,0.0,0.0,1.0
+Human approval gates,0.0,0.0,0.0,1.0
+Memory persistence behavior,0.0,0.0,0.0,1.0
+RAG source trust labels,0.0,0.0,0.0,1.0
+Inter-agent communication,0.0,0.0,0.0,1.0
+Credential scope,0.0,0.0,0.0,1.0
+External action capability,0.0,0.0,0.0,1.0
+Audit logging signals,0.0,0.0,0.0,1.0
+Change diff with risk impact,0.0,0.0,0.0,1.0
+Forensic readiness score,0.0,0.0,0.0,1.0
+Native-equivalent total,1.0,1.5,2.0,14.0

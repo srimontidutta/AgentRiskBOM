@@ -1,0 +1,878 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+$id: urn:agentriskbom:schema:1.0.0
+title: AgentRiskBOM Reference Schema
+description: Machine-readable reference schema for AgentRiskBOM, a security bill of materials for risk-scoping
+  tool-using AI agents. The schema represents the delegated authority of a deployed agent through reviewable
+  fields covering agent identity, model context, prompt policy, tools, memory and data, orchestration,
+  autonomy and authority, inter-agent relationships, audit evidence, and provenance.
+$comment: This reference schema implements the field structure and security relationships described in
+  the AgentRiskBOM paper. It preserves the paper's additive relationship to SBOM, AI-BOM, and ML-BOM artifacts
+  and its explicit support for unknown, not-applicable, and inherited values.
+type: object
+additionalProperties: false
+required:
+- profile
+- schema_version
+- agent
+- model_layer
+- prompt_policy_layer
+- tool_layer
+- memory_data_layer
+- orchestration_layer
+- autonomy_authority_layer
+- inter_agent_layer
+- audit_layer
+- provenance
+properties:
+  profile:
+    const: AgentRiskBOM
+    description: Identifies the artifact as an AgentRiskBOM profile.
+  schema_version:
+    const: 1.0.0
+    description: Version of the AgentRiskBOM reference schema.
+  agent:
+    $ref: '#/$defs/agentLayer'
+  model_layer:
+    $ref: '#/$defs/modelLayerOrStatus'
+  prompt_policy_layer:
+    $ref: '#/$defs/promptPolicyLayerOrStatus'
+  tool_layer:
+    $ref: '#/$defs/toolLayerOrStatus'
+  memory_data_layer:
+    $ref: '#/$defs/memoryDataLayerOrStatus'
+  orchestration_layer:
+    $ref: '#/$defs/orchestrationLayerOrStatus'
+  autonomy_authority_layer:
+    $ref: '#/$defs/autonomyAuthorityLayerOrStatus'
+  inter_agent_layer:
+    $ref: '#/$defs/interAgentLayerOrStatus'
+  audit_layer:
+    $ref: '#/$defs/auditLayerOrStatus'
+  provenance:
+    $ref: '#/$defs/provenanceLayer'
+  assessments:
+    $ref: '#/$defs/assessmentsOrStatus'
+    description: Optional analysis outputs associated with an AgentRiskBOM artifact, including risk score,
+      forensic-readiness score, risk drivers, and mapped control families.
+  extensions:
+    type: object
+    description: Namespace for deployment-specific or future fields that extend the core AgentRiskBOM
+      field set.
+    additionalProperties: true
+$defs:
+  statusMarker:
+    type: object
+    description: State used when a field or layer is unknown, not applicable, or inherited from another
+      artifact.
+    additionalProperties: false
+    required:
+    - status
+    properties:
+      status:
+        type: string
+        enum:
+        - unknown
+        - not_applicable
+        - inherited
+      source_ref:
+        type: string
+        description: Reference to the authoritative external artifact when the value is inherited.
+      field_path:
+        type: string
+        description: Optional field path within the referenced external artifact.
+      note:
+        type: string
+    allOf:
+    - if:
+        properties:
+          status:
+            const: inherited
+        required:
+        - status
+      then:
+        required:
+        - source_ref
+  autonomyLevelOrStatus:
+    oneOf:
+    - type: string
+      enum:
+      - A0
+      - A1
+      - A2
+      - A3
+      - A4
+      - A5
+    - $ref: '#/$defs/statusMarker'
+    description: Autonomy level. The paper uses levels A0 through A5.
+  toolRiskTierOrStatus:
+    oneOf:
+    - type: string
+      enum:
+      - T0
+      - T1
+      - T2
+      - T3
+      - T4
+      - T5
+    - $ref: '#/$defs/statusMarker'
+    description: Tool-risk tier. The paper uses tiers T0 through T5.
+  hashDescriptor:
+    type: object
+    additionalProperties: false
+    required:
+    - name
+    - value
+    properties:
+      name:
+        type: string
+      value:
+        oneOf:
+        - type: string
+        - $ref: '#/$defs/statusMarker'
+        description: Recorded hash value.
+      algorithm:
+        oneOf:
+        - type: string
+        - $ref: '#/$defs/statusMarker'
+        description: Hash algorithm, when documented.
+  promptHashDescriptor:
+    type: object
+    additionalProperties: false
+    required:
+    - name
+    - hash
+    properties:
+      name:
+        type: string
+        description: Prompt or prompt-layer identifier.
+      hash:
+        oneOf:
+        - type: string
+        - $ref: '#/$defs/statusMarker'
+        description: Hash representing the prompt content.
+  approvalRule:
+    type: object
+    additionalProperties: false
+    required:
+    - scope
+    - required
+    properties:
+      scope:
+        type: string
+        description: Action, tool, or authority scope governed by this approval rule.
+      required:
+        oneOf:
+        - type: boolean
+        - $ref: '#/$defs/statusMarker'
+        description: Whether human approval is required for the stated scope.
+  credentialDescriptor:
+    type: object
+    additionalProperties: false
+    required:
+    - scope
+    - secret_storage
+    - rotation_policy
+    - least_privilege_status
+    - cloud_permissions
+    properties:
+      name:
+        type: string
+      scope:
+        oneOf:
+        - type: string
+        - $ref: '#/$defs/statusMarker'
+        description: Credential scope available to the agent.
+      secret_storage:
+        oneOf:
+        - type: string
+        - $ref: '#/$defs/statusMarker'
+        description: How credential secrets are stored.
+      rotation_policy:
+        oneOf:
+        - type: string
+        - $ref: '#/$defs/statusMarker'
+        description: Credential rotation policy.
+      least_privilege_status:
+        oneOf:
+        - type: boolean
+        - $ref: '#/$defs/statusMarker'
+        description: Whether the credential is documented as least-privilege for the task.
+      cloud_permissions:
+        oneOf:
+        - type: array
+          items:
+            type: string
+          uniqueItems: true
+        - $ref: '#/$defs/statusMarker'
+        description: Cloud permissions or roles associated with the credential, where applicable.
+  ragSourceDescriptor:
+    type: object
+    additionalProperties: false
+    required:
+    - source
+    - trust_label
+    - provenance
+    - trust_boundary
+    properties:
+      name:
+        type: string
+      source:
+        oneOf:
+        - type: string
+        - $ref: '#/$defs/statusMarker'
+        description: RAG or retrieval source.
+      classification:
+        oneOf:
+        - type: string
+        - $ref: '#/$defs/statusMarker'
+        description: Data classification associated with the source.
+      trust_label:
+        oneOf:
+        - type: string
+        - $ref: '#/$defs/statusMarker'
+        description: Trust label for the retrieval source.
+      provenance:
+        oneOf:
+        - type: string
+        - $ref: '#/$defs/statusMarker'
+        description: Provenance information for the retrieval source.
+      trust_boundary:
+        oneOf:
+        - type: string
+        - $ref: '#/$defs/statusMarker'
+        description: Trust boundary applicable to the retrieval source.
+  toolDescriptor:
+    type: object
+    additionalProperties: false
+    required:
+    - name
+    - source
+    - protocol
+    - descriptor_hash
+    - review_date
+    - allowed_capabilities
+    - permissions
+    - side_effects
+    - destructive_side_effects
+    - external_endpoints
+    - risk_tier
+    - permission_tier
+    - approval_required
+    - rollback_evidence
+    properties:
+      name:
+        type: string
+      source:
+        oneOf:
+        - type: string
+        - $ref: '#/$defs/statusMarker'
+        description: Tool source.
+      protocol:
+        oneOf:
+        - type: string
+        - $ref: '#/$defs/statusMarker'
+        description: Tool protocol.
+      descriptor_hash:
+        oneOf:
+        - type: string
+        - $ref: '#/$defs/statusMarker'
+        description: Hash of the tool descriptor or equivalent metadata.
+      review_date:
+        oneOf:
+        - type: string
+          format: date
+        - $ref: '#/$defs/statusMarker'
+        description: Date associated with tool review metadata.
+      allowed_capabilities:
+        oneOf:
+        - type: array
+          items:
+            type: string
+          uniqueItems: true
+        - $ref: '#/$defs/statusMarker'
+        description: Capabilities the tool is allowed to exercise.
+      permissions:
+        oneOf:
+        - type: array
+          items:
+            type: string
+          uniqueItems: true
+        - $ref: '#/$defs/statusMarker'
+        description: Permissions granted to the tool.
+      side_effects:
+        oneOf:
+        - type: array
+          items:
+            type: string
+          uniqueItems: true
+        - $ref: '#/$defs/statusMarker'
+        description: Side effects the tool can cause in files, systems, workflows, or external services.
+      destructive_side_effects:
+        oneOf:
+        - type: array
+          items:
+            type: string
+          uniqueItems: true
+        - $ref: '#/$defs/statusMarker'
+        description: Destructive side effects such as deletion, overwrite, execution, or critical modification.
+      external_endpoints:
+        oneOf:
+        - type: array
+          items:
+            type: string
+          uniqueItems: true
+        - $ref: '#/$defs/statusMarker'
+        description: External systems or endpoints the tool can affect.
+      risk_tier:
+        $ref: '#/$defs/toolRiskTierOrStatus'
+      permission_tier:
+        oneOf:
+        - type: string
+        - $ref: '#/$defs/statusMarker'
+        description: Permission tier used to review destructive or otherwise consequential tool authority.
+      approval_required:
+        oneOf:
+        - type: boolean
+        - $ref: '#/$defs/statusMarker'
+        description: Whether use of this tool or its consequential actions requires human approval.
+      rollback_evidence:
+        oneOf:
+        - type: string
+        - $ref: '#/$defs/statusMarker'
+        description: Evidence that rollback or recovery is available for destructive changes.
+  externalBomReference:
+    type: object
+    additionalProperties: false
+    required:
+    - bom_type
+    - reference
+    properties:
+      bom_type:
+        type: string
+        description: Artifact class, such as SBOM, AI-BOM, or ML-BOM.
+      reference:
+        type: string
+  agentLayer:
+    type: object
+    description: Agent identity and deployment context.
+    additionalProperties: false
+    required:
+    - owner
+    - purpose
+    - version
+    - environment
+    - business_criticality
+    properties:
+      name:
+        oneOf:
+        - type: string
+        - $ref: '#/$defs/statusMarker'
+        description: Agent name or identifier.
+      owner:
+        oneOf:
+        - type: string
+        - $ref: '#/$defs/statusMarker'
+        description: Owner responsible for the agent or deployment.
+      purpose:
+        oneOf:
+        - type: string
+        - $ref: '#/$defs/statusMarker'
+        description: Intended purpose of the deployed agent.
+      version:
+        oneOf:
+        - type: string
+        - $ref: '#/$defs/statusMarker'
+        description: Version of the deployed agent.
+      environment:
+        oneOf:
+        - type: string
+        - $ref: '#/$defs/statusMarker'
+        description: Deployment environment.
+      business_criticality:
+        oneOf:
+        - type: string
+        - $ref: '#/$defs/statusMarker'
+        description: Business criticality of the deployment.
+  modelLayer:
+    type: object
+    additionalProperties: false
+    required:
+    - provider
+    - model
+    - version
+    - hosting_mode
+    - external_ai_ml_bom_references
+    properties:
+      provider:
+        oneOf:
+        - type: string
+        - $ref: '#/$defs/statusMarker'
+        description: Model provider.
+      model:
+        oneOf:
+        - type: string
+        - $ref: '#/$defs/statusMarker'
+        description: Model name or identifier.
+      version:
+        oneOf:
+        - type: string
+        - $ref: '#/$defs/statusMarker'
+        description: Model version.
+      hosting_mode:
+        oneOf:
+        - type: string
+        - $ref: '#/$defs/statusMarker'
+        description: Model hosting mode.
+      external_ai_ml_bom_references:
+        oneOf:
+        - type: array
+          items:
+            $ref: '#/$defs/externalBomReference'
+        - $ref: '#/$defs/statusMarker'
+        description: References to AI-BOM or ML-BOM artifacts that remain authoritative for model or training
+          provenance.
+  modelLayerOrStatus:
+    oneOf:
+    - $ref: '#/$defs/modelLayer'
+    - $ref: '#/$defs/statusMarker'
+  promptPolicyLayer:
+    type: object
+    additionalProperties: false
+    required:
+    - prompt_hierarchy
+    - prompt_hashes
+    - prompt_change_control
+    - trusted_input_boundaries
+    - prompt_injection_mitigations
+    - output_controls
+    properties:
+      prompt_hierarchy:
+        oneOf:
+        - type: array
+          items:
+            type: string
+          uniqueItems: true
+        - $ref: '#/$defs/statusMarker'
+        description: Prompt hierarchy, where documented.
+      prompt_hashes:
+        oneOf:
+        - type: array
+          items:
+            $ref: '#/$defs/promptHashDescriptor'
+        - $ref: '#/$defs/statusMarker'
+        description: Prompt hashes used for change review without requiring raw prompt disclosure.
+      prompt_change_control:
+        oneOf:
+        - type: string
+        - $ref: '#/$defs/statusMarker'
+        description: Prompt change-control process or state.
+      trusted_input_boundaries:
+        oneOf:
+        - type: array
+          items:
+            type: string
+          uniqueItems: true
+        - $ref: '#/$defs/statusMarker'
+        description: Boundaries distinguishing trusted and untrusted input or retrieved content.
+      prompt_injection_mitigations:
+        oneOf:
+        - type: array
+          items:
+            type: string
+          uniqueItems: true
+        - $ref: '#/$defs/statusMarker'
+        description: Prompt-injection mitigations applied by the deployment.
+      output_controls:
+        oneOf:
+        - type: array
+          items:
+            type: string
+          uniqueItems: true
+        - $ref: '#/$defs/statusMarker'
+        description: Controls intended to constrain disclosure or unsafe output behavior.
+  promptPolicyLayerOrStatus:
+    oneOf:
+    - $ref: '#/$defs/promptPolicyLayer'
+    - $ref: '#/$defs/statusMarker'
+  toolLayer:
+    type: object
+    additionalProperties: false
+    required:
+    - tools
+    properties:
+      tools:
+        oneOf:
+        - type: array
+          items:
+            $ref: '#/$defs/toolDescriptor'
+        - $ref: '#/$defs/statusMarker'
+        description: Tools available to the agent and the authority associated with each tool.
+  toolLayerOrStatus:
+    oneOf:
+    - $ref: '#/$defs/toolLayer'
+    - $ref: '#/$defs/statusMarker'
+  memoryDataLayer:
+    type: object
+    additionalProperties: false
+    required:
+    - memory_type
+    - memory_persistence
+    - rag_sources
+    - data_classification
+    - retention_policy
+    - vector_store
+    - retrieval_logging
+    - access_control
+    properties:
+      memory_type:
+        oneOf:
+        - type: string
+        - $ref: '#/$defs/statusMarker'
+        description: Memory type.
+      memory_persistence:
+        oneOf:
+        - type: string
+        - $ref: '#/$defs/statusMarker'
+        description: Persistence behavior of agent memory.
+      rag_sources:
+        oneOf:
+        - type: array
+          items:
+            $ref: '#/$defs/ragSourceDescriptor'
+        - $ref: '#/$defs/statusMarker'
+        description: RAG or retrieval sources, including trust labels and provenance.
+      data_classification:
+        oneOf:
+        - type: string
+        - $ref: '#/$defs/statusMarker'
+        description: Data classification for accessible or retained data.
+      retention_policy:
+        oneOf:
+        - type: string
+        - $ref: '#/$defs/statusMarker'
+        description: Retention policy for memory or retrieved data.
+      vector_store:
+        oneOf:
+        - type: string
+        - $ref: '#/$defs/statusMarker'
+        description: Vector-store information, where applicable.
+      retrieval_logging:
+        oneOf:
+        - type: boolean
+        - $ref: '#/$defs/statusMarker'
+        description: Whether retrieval activity is logged.
+      access_control:
+        oneOf:
+        - type: string
+        - $ref: '#/$defs/statusMarker'
+        description: Access-control properties governing memory or retained data.
+  memoryDataLayerOrStatus:
+    oneOf:
+    - $ref: '#/$defs/memoryDataLayer'
+    - $ref: '#/$defs/statusMarker'
+  orchestrationLayer:
+    type: object
+    additionalProperties: false
+    required:
+    - framework
+    - max_steps
+    - code_access
+    - browser_access
+    - network_access
+    - network_boundary
+    - sandboxing
+    properties:
+      framework:
+        oneOf:
+        - type: string
+        - $ref: '#/$defs/statusMarker'
+        description: Agent framework or orchestration environment.
+      max_steps:
+        oneOf:
+        - type: integer
+          minimum: 0
+        - $ref: '#/$defs/statusMarker'
+        description: Maximum orchestration steps, where applicable.
+      code_access:
+        oneOf:
+        - type: boolean
+        - $ref: '#/$defs/statusMarker'
+        description: Whether code execution is available.
+      browser_access:
+        oneOf:
+        - type: boolean
+        - $ref: '#/$defs/statusMarker'
+        description: Whether browser access is available.
+      network_access:
+        oneOf:
+        - type: boolean
+        - $ref: '#/$defs/statusMarker'
+        description: Whether network access is available.
+      network_boundary:
+        oneOf:
+        - type: string
+        - $ref: '#/$defs/statusMarker'
+        description: Network boundary within which the agent or its tools operate.
+      sandboxing:
+        oneOf:
+        - type: string
+        - $ref: '#/$defs/statusMarker'
+        description: Sandboxing or isolation applied to agent execution.
+  orchestrationLayerOrStatus:
+    oneOf:
+    - $ref: '#/$defs/orchestrationLayer'
+    - $ref: '#/$defs/statusMarker'
+  autonomyAuthorityLayer:
+    type: object
+    additionalProperties: false
+    required:
+    - autonomy_level
+    - max_tool_risk_tier
+    - approval_rules
+    - emergency_stop
+    - credentials
+    - external_action_capability
+    - external_communication
+    properties:
+      autonomy_level:
+        $ref: '#/$defs/autonomyLevelOrStatus'
+      max_tool_risk_tier:
+        $ref: '#/$defs/toolRiskTierOrStatus'
+      approval_rules:
+        oneOf:
+        - type: array
+          items:
+            $ref: '#/$defs/approvalRule'
+        - $ref: '#/$defs/statusMarker'
+        description: Human-approval rules governing consequential actions.
+      emergency_stop:
+        oneOf:
+        - type: boolean
+        - $ref: '#/$defs/statusMarker'
+        description: Whether an emergency-stop mechanism is available.
+      credentials:
+        oneOf:
+        - type: array
+          items:
+            $ref: '#/$defs/credentialDescriptor'
+        - $ref: '#/$defs/statusMarker'
+        description: Credential scope and governance properties available to the agent.
+      external_action_capability:
+        oneOf:
+        - type: boolean
+        - $ref: '#/$defs/statusMarker'
+        description: Whether the agent can cause effects outside its internal reasoning process.
+      external_communication:
+        oneOf:
+        - type: boolean
+        - $ref: '#/$defs/statusMarker'
+        description: Whether the agent can communicate with external systems or recipients.
+  autonomyAuthorityLayerOrStatus:
+    oneOf:
+    - $ref: '#/$defs/autonomyAuthorityLayer'
+    - $ref: '#/$defs/statusMarker'
+  interAgentLayer:
+    type: object
+    additionalProperties: false
+    required:
+    - delegation_policy
+    - shared_memory
+    - trust_domains
+    - identity_propagation
+    - communication
+    properties:
+      delegation_policy:
+        oneOf:
+        - type: string
+        - $ref: '#/$defs/statusMarker'
+        description: Policy governing delegation to other agents.
+      shared_memory:
+        oneOf:
+        - type: string
+        - $ref: '#/$defs/statusMarker'
+        description: Shared-memory behavior across agents.
+      trust_domains:
+        oneOf:
+        - type: array
+          items:
+            type: string
+          uniqueItems: true
+        - $ref: '#/$defs/statusMarker'
+        description: Trust domains relevant to inter-agent interactions.
+      identity_propagation:
+        oneOf:
+        - type: string
+        - $ref: '#/$defs/statusMarker'
+        description: How identity or authority is propagated across agent delegation.
+      communication:
+        oneOf:
+        - type: string
+        - $ref: '#/$defs/statusMarker'
+        description: Inter-agent communication behavior or mechanism.
+  interAgentLayerOrStatus:
+    oneOf:
+    - $ref: '#/$defs/interAgentLayer'
+    - $ref: '#/$defs/statusMarker'
+  auditLayer:
+    type: object
+    additionalProperties: false
+    required:
+    - prompt_logging
+    - tool_call_logging
+    - retrieval_logging
+    - approval_logging
+    - memory_write_logging
+    - log_retention
+    - tamper_resistance
+    properties:
+      prompt_logging:
+        oneOf:
+        - type: boolean
+        - $ref: '#/$defs/statusMarker'
+        description: Whether prompt activity is logged.
+      tool_call_logging:
+        oneOf:
+        - type: boolean
+        - $ref: '#/$defs/statusMarker'
+        description: Whether tool calls are logged.
+      retrieval_logging:
+        oneOf:
+        - type: boolean
+        - $ref: '#/$defs/statusMarker'
+        description: Whether retrieval activity is logged.
+      approval_logging:
+        oneOf:
+        - type: boolean
+        - $ref: '#/$defs/statusMarker'
+        description: Whether approval decisions are logged.
+      memory_write_logging:
+        oneOf:
+        - type: boolean
+        - $ref: '#/$defs/statusMarker'
+        description: Whether memory writes are logged.
+      log_retention:
+        oneOf:
+        - type: string
+        - $ref: '#/$defs/statusMarker'
+        description: Retention policy or duration for relevant logs.
+      tamper_resistance:
+        oneOf:
+        - type: string
+        - $ref: '#/$defs/statusMarker'
+        description: Tamper-resistance properties of audit evidence.
+  auditLayerOrStatus:
+    oneOf:
+    - $ref: '#/$defs/auditLayer'
+    - $ref: '#/$defs/statusMarker'
+  provenanceLayer:
+    type: object
+    additionalProperties: false
+    required:
+    - generated_by
+    - commit_hash
+    - timestamp
+    - signature
+    - external_bom_references
+    - artifact_provenance
+    - hashes
+    - source_registry
+    - review_metadata
+    properties:
+      generated_by:
+        oneOf:
+        - type: string
+        - $ref: '#/$defs/statusMarker'
+        description: Entity or process that generated the artifact.
+      commit_hash:
+        oneOf:
+        - type: string
+        - $ref: '#/$defs/statusMarker'
+        description: Associated source or configuration commit hash.
+      timestamp:
+        oneOf:
+        - type: string
+          format: date-time
+        - $ref: '#/$defs/statusMarker'
+        description: Artifact timestamp.
+      signature:
+        oneOf:
+        - type: string
+        - $ref: '#/$defs/statusMarker'
+        description: Artifact signature or signature reference.
+      external_bom_references:
+        oneOf:
+        - type: array
+          items:
+            $ref: '#/$defs/externalBomReference'
+        - $ref: '#/$defs/statusMarker'
+        description: References to SBOM, AI-BOM, ML-BOM, or other authoritative provenance artifacts.
+      artifact_provenance:
+        oneOf:
+        - type: string
+        - $ref: '#/$defs/statusMarker'
+        description: Provenance information for the AgentRiskBOM or referenced agent artifact.
+      hashes:
+        oneOf:
+        - type: array
+          items:
+            $ref: '#/$defs/hashDescriptor'
+        - $ref: '#/$defs/statusMarker'
+        description: Hashes used to support integrity and supply-chain review.
+      source_registry:
+        oneOf:
+        - type: string
+        - $ref: '#/$defs/statusMarker'
+        description: Source registry or equivalent origin information for relevant artifacts.
+      review_metadata:
+        oneOf:
+        - type: object
+          description: Review metadata. The paper names review metadata as a visibility field without
+            prescribing a fixed substructure.
+          not:
+            required:
+            - status
+          properties:
+            review_date:
+              type: string
+              format: date
+          additionalProperties: true
+        - $ref: '#/$defs/statusMarker'
+        description: Review metadata associated with the artifact or its sources.
+  assessments:
+    type: object
+    additionalProperties: false
+    properties:
+      risk_score:
+        oneOf:
+        - type: number
+          minimum: 0
+          maximum: 100
+        - $ref: '#/$defs/statusMarker'
+        description: Optional risk score associated with the artifact.
+      forensic_readiness_score:
+        oneOf:
+        - type: number
+          minimum: 0
+          maximum: 100
+        - $ref: '#/$defs/statusMarker'
+        description: Optional forensic-readiness score associated with the artifact.
+      risk_drivers:
+        oneOf:
+        - type: array
+          items:
+            type: string
+          uniqueItems: true
+        - $ref: '#/$defs/statusMarker'
+        description: Risk drivers identified from the represented authority and governance properties.
+      mapped_control_families:
+        oneOf:
+        - type: array
+          items:
+            type: string
+          uniqueItems: true
+        - $ref: '#/$defs/statusMarker'
+        description: Control families associated with represented risk drivers.
+  assessmentsOrStatus:
+    oneOf:
+    - $ref: '#/$defs/assessments'
+    - $ref: '#/$defs/statusMarker'

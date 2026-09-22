@@ -1,0 +1,15 @@
+category,example_risk,fields_needed_for_visibility
+Prompt injection,External content overrides task instructions.,Trusted input boundaries; prompt-injection mitigations; retrieval logs
+Tool poisoning,Tool metadata causes unsafe tool selection.,Tool source; descriptor hash; review date; allowed capability
+Excessive agency,Agent executes actions beyond intended scope.,Autonomy level; tool tier; approval requirements; emergency stop
+Sensitive-data disclosure,Agent exposes private or internal data.,Data classification; external communication; output controls; logs
+RAG poisoning,Retrieved documents alter agent behavior.,RAG source labels; provenance; retrieval logging; trust boundary
+Memory leakage,Persistent memory stores or reveals sensitive data.,Memory type; retention policy; memory-write logging; access control
+Credential misuse,Agent operates with overbroad credentials.,Credential scope; secret storage; rotation; least-privilege status
+Unsafe external action,"Agent sends email, modifies systems, or triggers workflow.",Side effects; external endpoints; approval gates; audit logging
+Inter-agent trust,Delegated agents inherit unsafe authority.,Delegation policy; shared memory; trust domains; identity propagation
+Missing audit logging,Incident cannot be reconstructed.,Prompt; tool-call; retrieval; approval; memory-write logs
+Missing approval,High-risk actions occur without human review.,Approval rules; tool-risk tier; autonomy level; approval logs
+Overprivileged cloud access,Agent uses cloud credentials broader than its task requires.,Credential scope; cloud permissions; least-privilege status; rotation policy
+Destructive tool misuse,"Agent deletes, overwrites, executes, or modifies critical resources.",Destructive side effects; permission tier; sandboxing; approval gate; rollback evidence
+Supply-chain compromise,"Agent, model, dependency, or tool artifact is replaced or tampered with.",External BOM references; artifact provenance; hashes; signatures; source registry; review metadata
