@@ -1,7 +1,6 @@
 cff-version: 1.2.0
 message: "Please cite the AgentRiskBOM paper using the preferred citation below."
 title: "AgentRiskBOM: Research Artifacts"
-type: dataset
 authors:
   - family-names: Dutta
     given-names: Srimonti
