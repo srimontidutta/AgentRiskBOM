@@ -140,10 +140,7 @@ AgentRiskBOM/
 
 ## Citation
 
-If you use AgentRiskBOM, adopt or extend its reference schema, use its terminology or risk taxonomy, or compare against its capability dimensions, please cite the paper:
-
-<details>
-<summary>BibTeX</summary>
+If you find this work useful in your research, please cite:
 
 ```bibtex
 @misc{dutta2026agentriskbomriskscopingsecuritymaterials,
@@ -156,7 +153,5 @@ If you use AgentRiskBOM, adopt or extend its reference schema, use its terminolo
       url={https://arxiv.org/abs/2606.21877}, 
 }
 ```
-
-</details>
 
 The same entry is available in [`CITATION.bib`](CITATION.bib), and [`CITATION.cff`](CITATION.cff) supplies GitHub citation metadata with the paper as the preferred citation.
