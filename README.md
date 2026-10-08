@@ -140,7 +140,7 @@ AgentRiskBOM/
 
 ## Citation
 
-If you find this work useful in your research, please cite:
+If you find this work useful in your research, or if you use, adapt, extend, or compare against the AgentRiskBOM schema in academic work, please cite the AgentRiskBOM paper:
 
 ```bibtex
 @misc{dutta2026agentriskbomriskscopingsecuritymaterials,
