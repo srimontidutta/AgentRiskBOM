@@ -1,15 +1,15 @@
 cff-version: 1.2.0
-message: "Please cite the AgentRiskBOM paper using the preferred citation below."
+
+message: "Please use the preferred citation below."
+
 title: "AgentRiskBOM: Research Artifacts"
+
 authors:
   - family-names: Dutta
     given-names: Srimonti
   - family-names: Moharir
     given-names: Akshata Kishore
-identifiers:
-  - type: url
-    value: "https://arxiv.org/abs/2606.21877"
-    description: "arXiv:2606.21877"
+
 preferred-citation:
   type: generic
   title: "AgentRiskBOM: A Risk-Scoping Security Bill of Materials for Agentic AI Systems"
@@ -19,4 +19,8 @@ preferred-citation:
     - family-names: Moharir
       given-names: Akshata Kishore
   year: 2026
+  identifiers:
+    - type: url
+      value: "https://arxiv.org/abs/2606.21877"
+      description: "arXiv:2606.21877"
   url: "https://arxiv.org/abs/2606.21877"
